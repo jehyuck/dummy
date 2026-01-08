@@ -7,10 +7,12 @@ import com.example.loadtest.domain.ProblemRepository;
 import com.example.loadtest.domain.QuizSubmission;
 import com.example.loadtest.domain.QuizSubmissionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProblemService {
@@ -48,6 +50,7 @@ public class ProblemService {
 
     @Transactional(readOnly = true)
     public ProblemResponse get(Long id) {
+        log.info("get in?");
         return ProblemResponse.from(
             problemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("not found")));
