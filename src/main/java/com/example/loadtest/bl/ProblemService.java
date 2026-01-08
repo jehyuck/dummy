@@ -26,7 +26,8 @@ public class ProblemService {
             .orElseThrow(() -> new IllegalArgumentException("not found"));
 
         QuizSubmission submission = new QuizSubmission(problemId, answer);
-        return QuizSubmissionResponse.from(quizSubmissionRepository.save(submission));
+        quizSubmissionRepository.save(submission);
+        return QuizSubmissionResponse.from(submission);
     }
 
     @Transactional
