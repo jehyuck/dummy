@@ -1,0 +1,147 @@
+package com.example.loadtest;
+
+import com.example.loadtest.domain.Problem;
+import com.example.loadtest.domain.ProblemRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class InitDataConfig {
+
+    @Bean
+    CommandLineRunner init(ProblemRepository repository) {
+        return args -> {
+            for (int i = 1; i <= 100; i++) {
+                repository.save(new Problem("problem-" + i));
+            }
+        };
+    }
+}
+package com.example.loadtest;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class LoadtestApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(LoadtestApplication.class, args);
+	}
+
+}
+package com.example.loadtest.api;
+
+import com.example.loadtest.domain.Problem;
+import com.example.loadtest.domain.ProblemRepository;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class LoadTestController {
+
+    private final ProblemRepository problemRepository;
+
+    public LoadTestController(ProblemRepository problemRepository) {
+        this.problemRepository = problemRepository;
+    }
+
+//    GET DB read
+    @GetMapping("/problems/{id}")
+    public Problem getProblem(@PathVariable Long id) throws InterruptedException {
+        Thread.sleep(50);
+        return problemRepository.findById(id)
+            .orElseThrow();
+    }
+
+//    POST DB write
+    @PostMapping("/quiz/submit")
+    public String submitQuiz(@RequestBody QuizRequest request) throws InterruptedException {
+        Thread.sleep(100);
+        problemRepository.findById(request.problemId())
+            .orElseThrow();
+        return "ok";
+    }
+
+//    POST internal + external
+    @PostMapping("/summary")
+    public String summary(@RequestBody SummaryRequest request) throws InterruptedException {
+        Thread.sleep(100);
+        problemRepository.findById(request.problemId())
+            .orElseThrow();
+
+        simulateExternalCall();
+
+        return "summary-ok";
+    }
+
+    private void simulateExternalCall() throws InterruptedException {
+        Thread.sleep(300);
+    }
+}
+package com.example.loadtest.api;
+
+public record QuizRequest(Long problemId, String answer) {
+}
+package com.example.loadtest.api;
+
+public record SummaryRequest(Long problemId) {
+}
+package com.example.loadtest.domain;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Problem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+
+    protected Problem() {}
+
+    public Problem(String title) {
+        this.title = title;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+}
+package com.example.loadtest.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProblemRepository extends JpaRepository<Problem, Long> {
+}
+server:
+port:8080
+tomcat:
+threads:
+max: 200 # ??? ? ?? thread? ? ??
+min-spare: 10 # ?? ??? ????(idle) thread? ??
+accept-count: 100 # ?? ?? ???
+spring:
+datasource:
+url: jdbc:h2:mem:testdb
+driver-class-name: org.h2.Driver
+username: sa
+password:
+
+jpa:
+hibernate:
+ddl-auto: create
+show-sql: true¡
+open-in-view: false
+
+h2:
+console:
+enabled: true
+path: /h2-console
