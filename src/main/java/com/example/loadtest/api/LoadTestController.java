@@ -15,14 +15,14 @@ public class LoadTestController {
 
     // GET DB read
     @GetMapping("/problems/{id}")
-    public Problem getProblem(@PathVariable Long id) throws InterruptedException {
+    public ProblemResponse getProblem(@PathVariable Long id) throws InterruptedException {
         Thread.sleep(50);
         return problemService.get(id);
     }
 
     // POST DB write (실제 insert)
     @PostMapping("/quiz/submit")
-    public QuizSubmission submitQuiz(@RequestBody QuizRequest request) throws InterruptedException {
+    public QuizSubmissionResponse submitQuiz(@RequestBody QuizRequest request) throws InterruptedException {
         Thread.sleep(100);
         return problemService.submit(
             request.problemId(),
@@ -32,7 +32,7 @@ public class LoadTestController {
 
     // POST internal + external
     @PostMapping("/summary")
-    public Problem summary(@RequestBody SummaryRequest request) throws InterruptedException {
+    public ProblemResponse summary(@RequestBody SummaryRequest request) throws InterruptedException {
         Thread.sleep(100);
         return problemService.process(request.problemId());
     }

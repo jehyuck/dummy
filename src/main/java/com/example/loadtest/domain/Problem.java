@@ -1,9 +1,11 @@
 package com.example.loadtest.domain;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "problem")
+@Data
 public class Problem {
 
     @Id
